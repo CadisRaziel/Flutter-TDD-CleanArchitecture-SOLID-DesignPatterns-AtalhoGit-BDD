@@ -14,6 +14,7 @@ void main() {
   RemoteAuthentication? sut;
   HttpClientSpy? httpClient;
   String? url;
+  AuthenticationParams? params;
 
   setUp(() {
     httpClient = HttpClientSpy();
@@ -22,22 +23,22 @@ void main() {
       httpClient: httpClient!,
       url: url!,
     );
-  });
-
-  test('should call HttpCliente with correct values', () async {
-    final params = AuthenticationParams(
+    params = AuthenticationParams(
       email: faker.internet.email(),
       secret: faker.internet.password(),
     );
-    await sut!.auth(params);
+  });
+
+  test('should call HttpCliente with correct values', () async {
+    await sut!.auth(params!);
 
     verify(
       httpClient!.request(
         url: url!,
         method: 'post',
         body: {
-          'email': params.email,
-          'password': params.secret,
+          'email': params!.email,
+          'password': params!.secret,
         },
       ),
     );
@@ -49,11 +50,7 @@ void main() {
       url: anyNamed('url'),
     )).thenThrow(HttpError.badRequest);
 
-    final params = AuthenticationParams(
-      email: faker.internet.email(),
-      secret: faker.internet.password(),
-    );
-    final future = sut!.auth(params);
+    final future = sut!.auth(params!);
 
     expect(future, throwsA(DomainError.unexpected));
   });
